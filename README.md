@@ -20,8 +20,7 @@ A high-precision flight data recorder system designed for model rockets. The sys
 - SparkFun Thing Plus - ESP32-S3
 - BMP390 pressure sensor with Qwiic connector
 - SD card module (SDIO interface)
-- WS2812 RGB LED
-- Appropriate power supply
+- Appropriate power supply (LiPo Battery 300mAH)
 
 ### Pin Connections
 
