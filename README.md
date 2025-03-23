@@ -17,9 +17,10 @@ A high-precision flight data recorder system designed for model rockets. The sys
 
 ## Hardware Requirements
 
-- ESP32-S3 board (or compatible)
-- BMP390 pressure sensor
+- SparkFun Thing Plus - ESP32-S3
+- BMP390 pressure sensor with Qwiic connector
 - SD card module (SDIO interface)
+- WS2812 RGB LED
 - Appropriate power supply
 
 ### Pin Connections
@@ -34,7 +35,7 @@ A high-precision flight data recorder system designed for model rockets. The sys
 
 #### Other Connections
 - RGB LED: Pin 46
-- BMP390: I2C interface (default pins)
+- BMP390: Connected via Qwiic I2C connector (no additional wiring needed)
 
 ## Software Setup
 
