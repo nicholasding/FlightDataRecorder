@@ -86,16 +86,12 @@ def plot_altitude_data(csv_path):
         flight_data['Time'] = flight_data['Time'] - start_time
         time_data = flight_data['Time']
         
-        # Calculate velocity (m/s) using central difference
-        dt = 0.05  # 50ms sampling rate
-        flight_data['Velocity_m_s'] = np.gradient(flight_data['Calibrated_Altitude'], dt)
+        # Calculate velocity (m/s) using simple difference
+        sampling_freq = 20  # 20Hz (1/0.05s)
+        flight_data['Velocity_m_s'] = flight_data['Calibrated_Altitude'].diff(periods=sampling_freq)
         
-        # Calculate acceleration (m/s²) using central difference of velocity
-        flight_data['Acceleration_m_s2'] = np.gradient(flight_data['Velocity_m_s'], dt)
-        
-        # Smooth acceleration data using rolling average
-        window_size = 10  # 500ms window (10 points at 50ms sampling)
-        flight_data['Acceleration_m_s2_smooth'] = flight_data['Acceleration_m_s2'].rolling(window=window_size, center=True).mean()
+        # Calculate acceleration (m/s²) using simple difference of velocity
+        flight_data['Acceleration_m_s2'] = flight_data['Velocity_m_s'].diff(periods=sampling_freq)
         
         # Create subplots
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
@@ -110,6 +106,10 @@ def plot_altitude_data(csv_path):
         # Plot altitude in meters (blue) and feet (dashed gray)
         ax1_m.plot(time_data, flight_data['Calibrated_Altitude'], 'b-', linewidth=1)
         ax1_ft.plot(time_data, flight_data['Altitude_ft'], 'gray', linestyle='--', alpha=0.5)
+        
+        # Set y-axis limits (900 ft = 274.32 meters)
+        ax1_m.set_ylim(0, 274.32)
+        ax1_ft.set_ylim(0, 900)
         
         # Add vertical line at apogee
         ax1_m.axvline(x=apogee_time, color='r', linestyle='--', alpha=0.5)
@@ -140,6 +140,8 @@ def plot_altitude_data(csv_path):
         ax2.axvline(x=apogee_time, color='r', linestyle='--', alpha=0.5)
         ax2.set_ylabel('Velocity (m/s)')
         ax2.grid(True)
+        # Set velocity y-axis limit: -25 to 100 m/s
+        ax2.set_ylim(-25, 100)
         
         # Add velocity statistics
         max_velocity = flight_data['Velocity_m_s'].max()
@@ -148,14 +150,16 @@ def plot_altitude_data(csv_path):
                 bbox=dict(facecolor='white', alpha=0.8))
         
         # Plot 3: Acceleration with apogee line
-        ax3.plot(time_data, flight_data['Acceleration_m_s2_smooth'], 'r-', linewidth=1)
+        ax3.plot(time_data, flight_data['Acceleration_m_s2'], 'r-', linewidth=1)
         ax3.axvline(x=apogee_time, color='r', linestyle='--', alpha=0.5)
         ax3.set_xlabel('Time (seconds)')
         ax3.set_ylabel('Acceleration (m/s²)')
         ax3.grid(True)
+        # Set acceleration y-axis limit: -20 to 75 m/s²
+        ax3.set_ylim(-20, 75)
         
-        # Add acceleration statistics using smoothed data
-        max_accel = flight_data['Acceleration_m_s2_smooth'].max()
+        # Add acceleration statistics
+        max_accel = flight_data['Acceleration_m_s2'].max()
         ax3.text(0.98, 0.98, f'Max Acceleration: {max_accel:.1f} m/s²', 
                 transform=ax3.transAxes, verticalalignment='top', horizontalalignment='right',
                 bbox=dict(facecolor='white', alpha=0.8))
