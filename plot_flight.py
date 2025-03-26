@@ -76,6 +76,11 @@ def plot_altitude_data(csv_path):
         df['Calibrated_Altitude'] = df['Altitude(m)'] - ground_level
         df['Altitude_ft'] = df['Calibrated_Altitude'] * 3.28084  # For display only
         
+        # Calculate velocity and acceleration on full dataset first
+        sampling_freq = 20  # 20Hz (1/0.05s)
+        df['Velocity_m_s'] = df['Calibrated_Altitude'].diff(periods=sampling_freq)
+        df['Acceleration_m_s2'] = df['Velocity_m_s'].diff(periods=sampling_freq)
+        
         # Find flight period
         flight_start, flight_end = find_flight_period(df, ground_level)
         print(f"Flight start: {flight_start}, Flight end: {flight_end}")
@@ -85,13 +90,6 @@ def plot_altitude_data(csv_path):
         start_time = flight_data['Time'].iloc[0]
         flight_data['Time'] = flight_data['Time'] - start_time
         time_data = flight_data['Time']
-        
-        # Calculate velocity (m/s) using simple difference
-        sampling_freq = 20  # 20Hz (1/0.05s)
-        flight_data['Velocity_m_s'] = flight_data['Calibrated_Altitude'].diff(periods=sampling_freq)
-        
-        # Calculate acceleration (m/s²) using simple difference of velocity
-        flight_data['Acceleration_m_s2'] = flight_data['Velocity_m_s'].diff(periods=sampling_freq)
         
         # Create subplots
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
